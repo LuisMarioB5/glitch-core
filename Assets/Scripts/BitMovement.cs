@@ -1,45 +1,45 @@
 using UnityEngine;
-using UnityEngine.InputSystem; 
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement; 
 
 public class BitMovement : MonoBehaviour
 {
     // VARIABLES DE MOVIMIENTO
     [SerializeField] private float moveSpeed = 5f;
     private Rigidbody2D rb;
-    private float moveInput; 
+    private float moveInput;
 
-    // VARIABLES DE SALTO (NUEVAS)
-    [SerializeField] private float jumpForce = 10f; // <-- NUEVO: Qué tan alto saltamos
-    private int jumpsRemaining; // <-- NUEVO: Contador para el doble salto
-    [SerializeField] private int totalJumps = 2; // <-- NUEVO: Total de saltos (para que sea 2 = doble salto)
-    private bool jumpPressed = false; // <-- NUEVO: Para registrar la pulsación de tecla
+    // VARIABLES DE SALTO
+    [SerializeField] private float jumpForce = 10f;
+    private int jumpsRemaining;
+    [SerializeField] private int totalJumps = 2;
+    private bool jumpPressed = false;
 
     // START
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        jumpsRemaining = totalJumps; // <-- NUEVO: Empezamos con todos nuestros saltos
+        jumpsRemaining = totalJumps;
     }
 
     // UPDATE (Leer el Input)
     void Update()
     {
         // ----- MOVIMIENTO HORIZONTAL -----
-        moveInput = 0f; 
+        moveInput = 0f;
         if (Keyboard.current != null && (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed))
         {
-            moveInput = -1f; 
+            moveInput = -1f;
         }
         if (Keyboard.current != null && (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed))
         {
-            moveInput = 1f; 
+            moveInput = 1f;
         }
 
-        // ----- LECTURA DE SALTO (NUEVO) -----
-        // wasPressedThisFrame significa que solo se activa 1 vez cuando la pulsas, no si la dejas pulsada
+        // ----- LECTURA DE SALTO -----
         if (Keyboard.current != null && (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame))
         {
-            jumpPressed = true; // <-- NUEVO: Damos la "orden" de saltar
+            jumpPressed = true;
         }
     }
 
@@ -49,33 +49,59 @@ public class BitMovement : MonoBehaviour
         // ----- APLICAR MOVIMIENTO -----
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
 
-        // ----- APLICAR SALTO (NUEVO) -----
+        // ----- APLICAR SALTO -----
         if (jumpPressed)
         {
-            // Solo saltamos si nos quedan saltos
             if (jumpsRemaining > 0)
             {
-                // Aplicamos la fuerza de salto vertical
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-                
-                // Restamos un salto
-                jumpsRemaining--; 
+                jumpsRemaining = jumpsRemaining - 1;
             }
-            
-            // Reseteamos la "orden" de saltar
-            jumpPressed = false; 
+            jumpPressed = false;
         }
     }
 
-    // ----- DETECTOR DE COLISIONES (NUEVO) -----
-    // Esta función se llama automáticamente cuando Bit choca con CUALQUIER COSA
+    // ----- DETECTOR DE COLISIONES -----
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // Comprobamos si la cosa con la que chocamos tiene la etiqueta "Ground"
+        // --- LÓGICA DE RESETEO DE SALTO ---
         if (collision.gameObject.CompareTag("Ground"))
         {
-            // Si es el suelo, reseteamos nuestro contador de saltos
-            jumpsRemaining = totalJumps; 
+            jumpsRemaining = totalJumps;
+        }
+
+        // --- LÓGICA DE ENEMIGO (STOMP O MUERTE) --- 
+        
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            // ----- ¡LA NUEVA LÓGICA DE STOMP! -----
+            // Obtenemos el primer punto de contacto de la colisión
+            ContactPoint2D contact = collision.contacts[0];
+            
+            // "contact.normal" es una flecha que apunta LEJOS de la superficie que golpeamos.
+            // Si golpeamos la CABEZA del BugByte, la flecha apuntará HACIA ARRIBA (Y = 1).
+            // Si golpeamos el LADO del BugByte, la flecha apuntará a un LADO (Y = 0).
+            
+            // Usamos 0.5f como un margen de seguridad, pero si "Y" es positivo, golpeamos desde arriba.
+            if (contact.normal.y > 0.5f)
+            {
+                // ----- ACCIÓN DE STOMP -----
+                
+                // 1. Destruir al enemigo
+                Destroy(collision.gameObject);
+                
+                // 2. ¡Hacer que Bit rebote un poco! (Mejora el "Game Feel")
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce * 0.75f); // 75% de la fuerza de un salto
+                
+                // 3. (Opcional) Restaurar un salto si estaba en el aire
+                jumpsRemaining++; // O puedes poner = 1 si prefieres que solo gane 1 salto
+            }
+            else
+            {
+                // ----- ACCIÓN DE MUERTE -----
+                // Si la "normal" no apuntaba hacia arriba, golpeamos por el lado.
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
         }
     }
 }
