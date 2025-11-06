@@ -392,7 +392,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7909968603627376060}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4078570923654524737, guid: a56c511046b4dba449a512a62d5b1fdb, type: 3}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: GoToLevel1
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6868809069701626279
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,7 +418,7 @@ GameObject:
   - component: {fileID: 848615528633562192}
   - component: {fileID: 5304577356890706767}
   m_Layer: 5
-  m_Name: Death_Canvas
+  m_Name: DeathCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

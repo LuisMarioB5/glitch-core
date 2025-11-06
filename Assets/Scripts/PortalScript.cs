@@ -1,28 +1,19 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // Necesario para cargar escenas
-
+using UnityEngine.Events;
 public class PortalScript : MonoBehaviour
 {
-    [SerializeField] private string sceneNameToLoad;
+    // ¡LA LÍNEA MÁGICA!
+    // Esto crea la "caja" en el Inspector, igual que la de un botón.
+    [SerializeField] private UnityEvent onPortalEntered;
 
-    // Esta función se llama automáticamente cuando algo entra en el Trigger
+    
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Comprobamos si la cosa que nos tocó es el jugador
-        // (La forma más rápida es ver si tiene el script de Bit)
+        // Si la cosa que nos tocó fue Bit...
         if (other.GetComponent<BitMovement>() != null)
         {
-            // Si el nombre de la escena NO está vacío...
-            if (!string.IsNullOrEmpty(sceneNameToLoad))
-            {
-                // ...cargamos esa escena.
-                SceneManager.LoadScene(sceneNameToLoad);
-            }
-            else
-            {
-                // Si se te olvidó poner el nombre en el Inspector, te avisará.
-                Debug.LogWarning("¡Se te olvidó poner el nombre de la escena en el Portal!");
-            }
+            // ...invocamos el evento (le decimos a la "caja" que se active)
+            onPortalEntered.Invoke();
         }
     }
 }
