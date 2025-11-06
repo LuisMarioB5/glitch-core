@@ -15,6 +15,9 @@ public class BitMovement : MonoBehaviour
     [SerializeField] private int totalJumps = 2;
     private bool jumpPressed = false;
 
+    // Variable para "conectar" nuestro panel de muerte
+    [SerializeField] private GameObject deathScreenPanel;
+
     // START
     void Start()
     {
@@ -55,7 +58,7 @@ public class BitMovement : MonoBehaviour
             if (jumpsRemaining > 0)
             {
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-                jumpsRemaining = jumpsRemaining - 1;
+                jumpsRemaining--;
             }
             jumpPressed = false;
         }
@@ -71,37 +74,63 @@ public class BitMovement : MonoBehaviour
         }
 
         // --- LÓGICA DE ENEMIGO (STOMP O MUERTE) --- 
-        
+
         if (collision.gameObject.CompareTag("Enemy"))
         {
             // ----- ¡LA NUEVA LÓGICA DE STOMP! -----
             // Obtenemos el primer punto de contacto de la colisión
             ContactPoint2D contact = collision.contacts[0];
-            
+
             // "contact.normal" es una flecha que apunta LEJOS de la superficie que golpeamos.
             // Si golpeamos la CABEZA del BugByte, la flecha apuntará HACIA ARRIBA (Y = 1).
             // Si golpeamos el LADO del BugByte, la flecha apuntará a un LADO (Y = 0).
-            
+
             // Usamos 0.5f como un margen de seguridad, pero si "Y" es positivo, golpeamos desde arriba.
             if (contact.normal.y > 0.5f)
             {
                 // ----- ACCIÓN DE STOMP -----
-                
+
                 // 1. Destruir al enemigo
                 Destroy(collision.gameObject);
-                
+
                 // 2. ¡Hacer que Bit rebote un poco! (Mejora el "Game Feel")
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce * 0.75f); // 75% de la fuerza de un salto
-                
+
                 // 3. (Opcional) Restaurar un salto si estaba en el aire
                 jumpsRemaining++; // O puedes poner = 1 si prefieres que solo gane 1 salto
             }
             else
             {
-                // ----- ACCIÓN DE MUERTE -----
-                // Si la "normal" no apuntaba hacia arriba, golpeamos por el lado.
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                BitDies();
             }
         }
+    }
+
+    // Esta función se llama cuando Bit entra en un "Trigger"
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // Si el objeto que tocamos tiene la etiqueta "Portal"...
+        if (other.CompareTag("Portal"))
+        {
+            // ...cargamos la siguiente escena.
+
+            // ¡OJO! Esto carga "Level_02".
+            // Para que funcione, tienes que crear una escena llamada "Level_02"
+            // y añadirla al Build Settings (File > Build Settings).
+            SceneManager.LoadScene("Level_02");
+        }
+    }
+    
+    // ----- ACCIÓN DE MUERTE -----
+    private void BitDies()
+    {
+        // 1. Activar el panel de muerte
+        deathScreenPanel?.SetActive(true);
+
+        // 2. Pausar el juego
+        Time.timeScale = 0f;
+
+        // 3. (Opcional) Desactivar el control de Bit
+        this.enabled = false;
     }
 }
