@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement; 
+using UnityEngine.SceneManagement;
+using TMPro;
 
 public class BitMovement : MonoBehaviour
 {
@@ -23,6 +24,16 @@ public class BitMovement : MonoBehaviour
     [SerializeField] private AudioClip jumpSound;
     [SerializeField] private AudioClip stompSound;
     [SerializeField] private AudioClip deathSound;
+    [SerializeField] private AudioClip pickUpCoinSound;
+    [SerializeField] private AudioClip heartPickUpSound;
+
+    [Header("UI")]
+    [SerializeField] private TextMeshProUGUI vidasText;
+    [SerializeField] private TextMeshProUGUI scoreText;
+
+    [Header("Game Stats")]
+    private static int lives = 3;
+    private static int score = 0;
 
     // START
     void Start()
@@ -30,6 +41,21 @@ public class BitMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         jumpsRemaining = totalJumps;
         myAudioSource = GetComponent<AudioSource>();
+
+        GameObject vidasObject = GameObject.FindWithTag("VidasUI");
+        
+        if (vidasObject != null)
+        {
+            vidasText = vidasObject.GetComponent<TextMeshProUGUI>();
+        }
+
+        GameObject scoreObject = GameObject.FindWithTag("ScoreUI");
+        if (scoreObject != null)
+        {
+            scoreText = scoreObject.GetComponent<TextMeshProUGUI>();
+        }
+        
+        UpdateUI(); 
     }
 
     // UPDATE (Leer el Input)
@@ -70,6 +96,8 @@ public class BitMovement : MonoBehaviour
             }
             jumpPressed = false;
         }
+
+        UpdateUI();
     }
 
     // ----- DETECTOR DE COLISIONES -----
@@ -113,31 +141,57 @@ public class BitMovement : MonoBehaviour
     // Esta función se llama cuando Bit entra en un "Trigger"
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Si el objeto que tocamos tiene la etiqueta "Portal"...
-        if (other.CompareTag("Portal"))
+        if (other.CompareTag("Collectible"))
         {
-            // ...cargamos la siguiente escena.
+            score += 10; // Suma 10 puntos
+            UpdateUI(); // Actualiza el texto
+            Destroy(other.gameObject); // Destruye la moneda
 
-            // ¡OJO! Esto carga "Level_02".
-            // Para que funcione, tienes que crear una escena llamada "Level_02"
-            // y añadirla al Build Settings (File > Build Settings).
-            SceneManager.LoadScene("Level_02");
+            myAudioSource.PlayOneShot(pickUpCoinSound);
+        } else if (other.CompareTag("Vida"))
+        {
+            lives++; // Suma una vida
+            UpdateUI(); // Actualiza el texto
+            Destroy(other.gameObject); // Destruye el corazon
+
+            myAudioSource.PlayOneShot(heartPickUpSound);
         }
+        
     }
-    
+
     // ----- ACCIÓN DE MUERTE -----
     private void BitDies()
     {
-        // Reproduce el sonido de muerte
         myAudioSource.PlayOneShot(deathSound);
+        lives--; // Resta una vida
+        UpdateUI(); // Actualiza el texto
 
-        // Activar el panel de muerte
-        deathScreenPanel?.SetActive(true);
+        if (lives > 0)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+        else
+        {
+            lives = 3; // Resetea las vidas para la próxima vez
+            deathScreenPanel.SetActive(true);
+            Time.timeScale = 0f;
 
-        // Pausar el juego
-        Time.timeScale = 0f;
-
-        // Desactivar el control de Bit
-        this.enabled = false;
+            // Desactivar el control de Bit
+            this.enabled = false;
+        }
+    }
+    
+    // Esta función actualiza los textos
+    private void UpdateUI()
+    {
+        if (vidasText != null)
+        {
+            vidasText.text = "Vidas: " + lives;
+        }
+        
+        if (scoreText != null)
+        {
+            scoreText.text = "Score: " + score;
+        }
     }
 }

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 9067479199333918613}
   - component: {fileID: 7197700193653606436}
   - component: {fileID: 5026273742821353344}
+  - component: {fileID: -2452667350357933069}
   m_Layer: 0
   m_Name: Bit
   m_TagString: Player
@@ -155,7 +156,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.003534317, y: 0.02522564}
+  m_Offset: {x: -0.003534317, y: 0.06543207}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -165,7 +166,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.1505585, y: 1.194622}
+  m_Size: {x: 1.1505585, y: 1.1142092}
   m_EdgeRadius: 0
 --- !u!114 &7197700193653606436
 MonoBehaviour:
@@ -186,6 +187,10 @@ MonoBehaviour:
   jumpSound: {fileID: 8300000, guid: 797762175b0626b4287bb64655c051dc, type: 3}
   stompSound: {fileID: 8300000, guid: d07c9bdfa83e5b14abbd5bb2a9576c31, type: 3}
   deathSound: {fileID: 8300000, guid: fc9f3ba8b9e0f064dbbafd01ab33a543, type: 3}
+  pickUpCoinSound: {fileID: 8300000, guid: 0595c1ffc8cf454499f811c46c93e42c, type: 3}
+  heartPickUpSound: {fileID: 8300000, guid: 29d0f08a6a013354595e1941648b3a2e, type: 3}
+  vidasText: {fileID: 0}
+  scoreText: {fileID: 0}
 --- !u!82 &5026273742821353344
 AudioSource:
   m_ObjectHideFlags: 0
@@ -283,3 +288,15 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &-2452667350357933069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8033668083009198996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 401131d241d70ee409be6eca23d7c162, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EntityFlipper

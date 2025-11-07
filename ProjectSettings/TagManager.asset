@@ -8,6 +8,10 @@ TagManager:
   - TurnPoint
   - Enemy
   - Portal
+  - Collectible
+  - VidasUI
+  - ScoreUI
+  - Vida
   layers:
   - Default
   - TransparentFX
