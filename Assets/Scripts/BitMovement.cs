@@ -15,14 +15,21 @@ public class BitMovement : MonoBehaviour
     [SerializeField] private int totalJumps = 2;
     private bool jumpPressed = false;
 
-    // Variable para "conectar" nuestro panel de muerte
+    // Variable para "conectar" con el panel de muerte
     [SerializeField] private GameObject deathScreenPanel;
+
+    // --- VARIABLES DE SONIDO ---
+    private AudioSource myAudioSource;
+    [SerializeField] private AudioClip jumpSound;
+    [SerializeField] private AudioClip stompSound;
+    [SerializeField] private AudioClip deathSound;
 
     // START
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         jumpsRemaining = totalJumps;
+        myAudioSource = GetComponent<AudioSource>();
     }
 
     // UPDATE (Leer el Input)
@@ -59,6 +66,7 @@ public class BitMovement : MonoBehaviour
             {
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
                 jumpsRemaining--;
+                myAudioSource.PlayOneShot(jumpSound);
             }
             jumpPressed = false;
         }
@@ -77,27 +85,23 @@ public class BitMovement : MonoBehaviour
 
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            // ----- ¡LA NUEVA LÓGICA DE STOMP! -----
-            // Obtenemos el primer punto de contacto de la colisión
             ContactPoint2D contact = collision.contacts[0];
 
-            // "contact.normal" es una flecha que apunta LEJOS de la superficie que golpeamos.
-            // Si golpeamos la CABEZA del BugByte, la flecha apuntará HACIA ARRIBA (Y = 1).
-            // Si golpeamos el LADO del BugByte, la flecha apuntará a un LADO (Y = 0).
-
-            // Usamos 0.5f como un margen de seguridad, pero si "Y" es positivo, golpeamos desde arriba.
             if (contact.normal.y > 0.5f)
             {
                 // ----- ACCIÓN DE STOMP -----
 
-                // 1. Destruir al enemigo
+                // Destruye al enemigo
                 Destroy(collision.gameObject);
 
-                // 2. ¡Hacer que Bit rebote un poco! (Mejora el "Game Feel")
+                // Reproduce el sonido de stomp
+                myAudioSource.PlayOneShot(stompSound);
+
+                // ¡Hace que Bit rebote un poco!
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce * 0.75f); // 75% de la fuerza de un salto
 
-                // 3. (Opcional) Restaurar un salto si estaba en el aire
-                jumpsRemaining++; // O puedes poner = 1 si prefieres que solo gane 1 salto
+                // Restaura un salto si estaba en el aire
+                jumpsRemaining++;
             }
             else
             {
@@ -124,13 +128,16 @@ public class BitMovement : MonoBehaviour
     // ----- ACCIÓN DE MUERTE -----
     private void BitDies()
     {
-        // 1. Activar el panel de muerte
+        // Reproduce el sonido de muerte
+        myAudioSource.PlayOneShot(deathSound);
+
+        // Activar el panel de muerte
         deathScreenPanel?.SetActive(true);
 
-        // 2. Pausar el juego
+        // Pausar el juego
         Time.timeScale = 0f;
 
-        // 3. (Opcional) Desactivar el control de Bit
+        // Desactivar el control de Bit
         this.enabled = false;
     }
 }
